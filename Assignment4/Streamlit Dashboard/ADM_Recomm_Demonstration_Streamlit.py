@@ -111,31 +111,31 @@ body {
 }
 </style>
     """, unsafe_allow_html=True)
-    
+
 #menu
 menu=["Dataset Schema","xDeepFM","Customer2Vec","Customer2Vec Clusters","Knowledge Graph"]
 choices = st.sidebar.selectbox("Select Recommendation Algorithm",menu)
-    
+
 if choices == 'xDeepFM':
     st.subheader('Extreme Deep Factorization')
     st.sidebar.success("xDeepFM is a deep learning based algorithm for implicit and explicit feedback with user/item features     This is a hybrid approach where it tries to learn both implicit and explicit features.     All examples of the hybrid category use Deep Neural Networks to learn     implicit bitwise feature interactions.     They differ in how the high order feature interactions are learned")
-    
+
     image = Image.open('xdeep.PNG')
     st.image(image, caption='Extreme Deep Factorization Model',
          use_column_width=True)
-    
+
     #chck = st.checkbox('Show Dataframe')
     if st.checkbox('Show Dataframe'):
         st.write(df_Snacks_XDeep)
-      
-    
+
+
     st.write('Click Label Count')
     st.write(sns.countplot(df_Snacks_XDeepFM['label'],label="Count"))
     st.pyplot()
     st.write('Feature Coorelation Heatmap')
     st.write(sns.heatmap(df_Snacks_XDeepFM.corr()))
     st.pyplot()
-    
+
     st.write('XDeepFM Model Metrics')
     hist_data = [train_history1['binary_crossentropy'],train_history1['val_binary_crossentropy'], train_history1['loss'], train_history1['val_loss']]
 
@@ -143,8 +143,8 @@ if choices == 'xDeepFM':
     fig = ff.create_distplot(
     hist_data, group_labels, bin_size=[.1, .1, .1, .1])
     st.plotly_chart(fig, use_container_width=True)
-    
-    
+
+
     # summarize history for accuracy
     st.write('XDeepFM Model Crossentropy')
     plt.plot(train_history1['binary_crossentropy'])
@@ -165,7 +165,7 @@ if choices == 'xDeepFM':
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
     st.pyplot()
-        
+
 elif choices == 'Customer2Vec':
     st.subheader("Customer2Vec Embedding Algorithm")
     st.sidebar.success("We learn good semantic representations for customers (users) from transactional data using doc2vec     Each customer is a document, orders are sentences, and products are words.     We also compare Customer2Vec with the baseline representations obtained using k-means on manually designed features.")
@@ -178,7 +178,7 @@ elif choices == 'Customer2Vec':
     alpha=0.3)
     plt.show()
     st.pyplot()
-    
+
     st.write('Visualize the Customer Semantic Space Using t-SNE')
     plt.figure(figsize=(10,8))
     sns.scatterplot(
@@ -188,16 +188,16 @@ elif choices == 'Customer2Vec':
     alpha=0.3)
     plt.show()
     st.pyplot()
-    
+
     st.write('Interactive Segmentation in the Customer Semantic Space') 
     plt.figure(figsize=(10, 8))
-    
+
     fig = px.scatter(tsne_doc, x="tsne-2d-one", y="tsne-2d-two")
-    
+
     #plt.show()
     st.plotly_chart(fig, use_container_width=True)
-    
-    
+
+
     st.write('Segmentation in the Customer Semantic Space') 
     plt.figure(figsize=(10, 8))
     sns.scatterplot(
@@ -210,12 +210,12 @@ elif choices == 'Customer2Vec':
     )
     plt.show()
     st.pyplot()
-    
-    
+
+
 elif choices == 'Knowledge Graph':
     st.subheader("Wikidata Knowledge Graph Extraction")
     st.sidebar.success('This is to illustrate how to extract Knowledge Graph.     Many recommendation algorithms (DKN, RippleNet, KGCN) use Knowledge Graphs (KGs) as an external source of information')
-    
+
     G = nx.from_pandas_edgelist(results_list, 'original_entity', 'linked_entities')
 
     target_names = results_list[["linked_entities", "name_linked_entities"]].drop_duplicates().rename(columns={"linked_entities": "labels", "name_linked_entities": "name"})
@@ -239,7 +239,7 @@ elif choices == 'Customer2Vec Clusters':
     clust = st.sidebar.radio(
     "Choose clusters you want to see",
     ('First', 'Second', 'Third', 'Forth', 'Seventh'))
-    
+
     if clust == 'First':
         cluster_id = 1
         st.write('You selected First Cluster')
@@ -255,17 +255,18 @@ elif choices == 'Customer2Vec Clusters':
     elif clust == 'Seventh':
         cluster_id = 7
         st.write("You selected Seventh Cluster")
-    
+
     user_input = ''
     input_lis = []
     user_lis = []
-    tick = st.sidebar.checkbox('Search by User ID')
-    if tick:
+    if tick := st.sidebar.checkbox('Search by User ID'):
         st.write('Enter UserID(Sep by ,) in search box')
         user_input = st.text_input("Enter user id for search", '')
-        
-        
 
+
+
+    snacks = ['Snakku', 'Love with food', 'Candy Club', 'Nature Box', 'ZenPop', 'World Sampler', 'FitSnack', 'Vegan Cuts',
+                'MunchPak', 'KetoKrate']
     if not user_input:
 
         #cluster_id = 4.0  #Tune with slider range
@@ -274,38 +275,30 @@ elif choices == 'Customer2Vec Clusters':
         #st.write(df_Snacks_XDeepFM.head())
         st.subheader("Cluster for all Products")
 
-        snacks = ['Snakku', 'Love with food', 'Candy Club', 'Nature Box', 'ZenPop', 'World Sampler', 'FitSnack', 'Vegan Cuts',
-                    'MunchPak', 'KetoKrate']
         st.subheader("Cluster for only Snacks")
-        prior_orders_details_snacks = prior_orders_details_clustered[prior_orders_details_clustered.product_name.isin(snacks)] 
+        prior_orders_details_snacks = prior_orders_details_clustered[prior_orders_details_clustered.product_name.isin(snacks)]
         #cluster_i  #Tune with slider range
         prior_orders_d_snacks = prior_orders_details_snacks[prior_orders_details_snacks['latent_cluster']==cluster_id][['user_id', 'product_name']].groupby("user_id").apply(lambda order: ' > '.join(order['product_name'])).reset_index()
         st.dataframe(prior_orders_d_snacks.style.highlight_max(axis=0), 3500, 700)
-        #st.write(df_Snacks_XDeepFM.head(10))
+            #st.write(df_Snacks_XDeepFM.head(10))
     else: 
         input_lis = user_input.split(',')
-        for u in input_lis:
-            user_lis.append(int(u))
-        
+        user_lis.extend(int(u) for u in input_lis)
         prior_orders_d = prior_orders_details_clustered[prior_orders_details_clustered['latent_cluster']==cluster_id][['user_id', 'product_name']].groupby("user_id").apply(lambda order: ' > '.join(order['product_name'])).reset_index()
         st.dataframe(prior_orders_d[prior_orders_d.user_id.isin(user_lis)], 3500, 700)
-        #st.write(df_Snacks_XDeepFM.head())
-
-        snacks = ['Snakku', 'Love with food', 'Candy Club', 'Nature Box', 'ZenPop', 'World Sampler', 'FitSnack', 'Vegan Cuts',
-                    'MunchPak', 'KetoKrate']
         st.subheader("Cluster for only Snacks")
-        prior_orders_details_snacks = prior_orders_details_clustered[prior_orders_details_clustered.product_name.isin(snacks)] 
+        prior_orders_details_snacks = prior_orders_details_clustered[prior_orders_details_clustered.product_name.isin(snacks)]
         #cluster_i  #Tune with slider range
         prior_orders_d_snacks = prior_orders_details_snacks[prior_orders_details_snacks['latent_cluster']==cluster_id][['user_id', 'product_name']].groupby("user_id").apply(lambda order: ' > '.join(order['product_name'])).reset_index()
         st.dataframe(prior_orders_d_snacks[prior_orders_d_snacks.user_id.isin(user_lis)], 3500, 700)
-        #st.write(df_Snacks_XDeepFM.head(10))
-        
+            #st.write(df_Snacks_XDeepFM.head(10))
+
 elif choices == 'Experiment':
     st.subheader("Experiment")
-    
+
     #epochs = np.arange(1,11)
-       
-    
+
+
 elif choices == 'Dataset Schema':
     st.subheader("Dataset Schema for the two Algorithms")
 
@@ -313,9 +306,9 @@ elif choices == 'Dataset Schema':
     image = Image.open('customer2vec.PNG')
     st.image(image, caption='Customer2Vec Dataset Schema',
          use_column_width=True)
-    
+
     st.write('This dataset is based on Cretio Click through rate dataset. We have columns like Customer name, Campaign details with categorical features related to the ad shown to users, user details and whether they clicked an Advertisement for a product or not.     This will be help us in recommending Products/Campaigns/Ads to customers that they are more likely to click and convert.')
-    
+
     image = Image.open('ctr.PNG')
     st.image(image, caption='xDeepFM Dataset Schema',
          use_column_width=True)

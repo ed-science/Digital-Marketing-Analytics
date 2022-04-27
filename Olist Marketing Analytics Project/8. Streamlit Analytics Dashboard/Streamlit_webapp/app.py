@@ -95,7 +95,7 @@ if choices == 'Product & Customer Behaviour Analysis':
     # creating a purchase day feature
     sales_per_purchase_month = Olist.groupby(['order_purchase_month', 'order_purchase_mon', 'order_purchase_day'], as_index=False).payment_value.sum()
     sales_per_purchase_month = sales_per_purchase_month.sort_values(by=['order_purchase_month'], ascending=True)
-    
+
     #st.write('Sales Each Month & Each Day of Week')
     st.markdown('Sales by **_Month_ _&_  _Day_ _of_ Week**.')
 
@@ -115,21 +115,21 @@ if choices == 'Product & Customer Behaviour Analysis':
     #ig.show()
     #st.line_chart(fig)
     st.write(fig)
-    
-    
-    
+
+
+
     Olist['review_dayofweek'] = Olist.review_answer_timestamp.apply(lambda x: x.dayofweek)
     Olist['review_day'] = Olist['review_dayofweek'].map({0:'Mon',1:'Tue',2:'Wed',3:'Thu',4:'Fri',5:'Sat',6:'Sun'})
     Olist['review_month'] = Olist.review_answer_timestamp.apply(lambda x: x.month).map({1:'Jan',2:'Feb',3:'Mar',4:'Apr',5:'May',6:'Jun',7:'Jul',8:'Aug',9:'Sep',10:'Oct',11:'Nov',12:'Dec'})
 
-    
+
     review_score_per_month = Olist.groupby(['review_month', 'review_day'], as_index=False).review_score.mean()
     #review_score_per_month = review_score_per_month.sort_values(by=['review_day'], ascending=True)
 
     st.markdown('**_Customer_ Rating** Each Month & DayofWeek')
     #st.markdown('Sales by **_Month_ _&_ _Each_ _Day_ _of_ _Week_ cool**.')
 
-    
+
     df = review_score_per_month
     fig = px.line(df, x="review_month", y="review_score", color='review_day', title='Sales Each Month & Each DayofWeek')
 
@@ -157,15 +157,15 @@ if choices == 'Product & Customer Behaviour Analysis':
     avg_score_per_category = avg_score_per_category[avg_score_per_category['Number of Reviews'] > 100]
     avg_score_per_category = avg_score_per_category.sort_values(by='Number of Reviews', ascending=False)
 
-    
+
     avg_ratings = avg_score_per_category[:20]
     fig = px.bar(avg_ratings, x='Product Category', y='Number of Reviews',
                  hover_data=['Average Review Ratings'], color='Average Review Ratings',
                  height=500)
     fig.show()
     st.write(fig)
-        
-    
+
+
     total_rev_month = Olist.groupby(['order_purchase_year', 'order_purchase_mon', 'product_category_name'], as_index=False).payment_value.sum()
     #total_rev_month = total_rev_month.sort_values(by=['order_purchase_year'], ascending=True)
     total_rev_month.columns = ['Sales Year','Sales Month','Product Category' , 'Sales Revenue']
@@ -207,16 +207,16 @@ if choices == 'Product & Customer Behaviour Analysis':
     #fig.show()
     fig.update_layout()
     st.write(fig)
-    
-    
-    
+
+
+
 elif choices == 'Customer Segmentation & LTV':
     st.subheader('Customer Segmentation & LTV')
     st.sidebar.success("Don't find Customers for your Product, find Products for your Customers")
-    
-    
+
+
     df_days_repurchase_subsegment_2018 = pd.read_csv('./data/df_days_repurchase_subsegment_2018.csv')
-    
+
     st.write('Customer Segmentation')
     st.markdown('Average Gap between **_First_ _and_ _Last_ Purchase**')
     configure_plotly_browser_state()
@@ -243,10 +243,10 @@ elif choices == 'Customer Segmentation & LTV':
     #py.iplot(fig)
     st.write(fig)
 
-    
-   
+
+
     rfm_level_ag = pd.read_csv('./data/rfm_level_ag.csv')
-    
+
     st.markdown('**_RFM_ _Customer_ Segmentation**')
     fig1 =go.Figure(go.Treemap(
         labels = rfm_level_ag['Customer Segment'],
@@ -255,7 +255,7 @@ elif choices == 'Customer Segmentation & LTV':
     ))
 
     st.write(fig1)
-    
+
     st.markdown('**_K-Means_ _based_ Clusters**')
     relative_imp = pd.read_csv('./data/rel_imp.csv')
     plt.figure(figsize=(13, 5))
@@ -264,7 +264,7 @@ elif choices == 'Customer Segmentation & LTV':
     plt.show()
     st.pyplot()
     st.write(fig2)
-    
+
     st.markdown('**_Customer_ _Lifetime_ Value**')
     image = Image.open('./images/conditional_expected_average_profit.png')
     st.image(image, caption='Conditional expected average profit',
@@ -290,31 +290,25 @@ elif choices == 'Customer Segmentation & LTV':
 elif choices == 'Social Media & Geography Analysis':
     st.subheader('Social Media & Geography Analysis')
     st.sidebar.success("Social Media is a whole new world, thats where the opportunity resides. Are you Analysing it?")  
-    
-    
+
+
     st.write('Reviews by **_State_ _&_ City**')
     if st.checkbox('Show Reviews by State & City'):
-        
+
         features = ['customer_zip_code_prefix', 'customer_city', 'customer_state', 'review_score']
         df = Olist[features]
         df1 = df.groupby(['customer_state', 'customer_city'])['review_score'].mean().to_frame()
         st.write(df1.head(15))
-    
-    
+
+
     st.markdown('Top 10 **_Twitter_ #Hashtags**')
     #hashtag.drop(columns=['Unnamed: 0'])
     st.write(hashtag.head(10))
-   
-    
+
+
     st.markdown('**_Real_ _Time_ Search** for Top Hashtags for a Product Keyword')
     user_input = ''
-    user_input = st.text_input("Enter product keyword for search", '')
-    
-    if not user_input:
-        pass
-    else:
-        
-        
+    if user_input := st.text_input("Enter product keyword for search", ''):
         CONSUMER_KEY = credentials.API_KEY
         CONSUMER_SECRET = credentials.API_SECRET_KEY
         OAUTH_TOKEN = credentials.ACCESS_TOKEN
@@ -346,20 +340,19 @@ elif choices == 'Social Media & Geography Analysis':
                     for hashtag in status['entities']['hashtags']]
 
         #print(json.dumps(hashtags[0:10], indent=1))
-        hashtag_ = {}
-        hashtag_['Top 10 #Hashtags'] = hashtags[0:15]
+        hashtag_ = {'Top 10 #Hashtags': hashtags[:15]}
         hashtag_df = pd.DataFrame(hashtag_)
         st.write(hashtag_df)
 
-    
-    
+
+
     st.write('**_Real_ Time** Social Media Product Analysis')
     image7 = Image.open('./images/streaming_.png')
     st.image(image7, caption='Real Time Twitter Mentions and Sentiment',
              use_column_width=True)
 
     st.markdown('**_Customer_ Review** Across Brazil')
-    
+
     image8 = Image.open('./images/mapplot.png')
     st.image(image8, caption='Customer Review across Brazil',
              use_column_width=True)
