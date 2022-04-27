@@ -128,43 +128,41 @@ app = flask.Flask(__name__, template_folder='templates')
 def main():
     if flask.request.method == 'GET':
         return(flask.render_template('index.html'))
-            
+
     if flask.request.method == 'POST':
         m_name = flask.request.form['movie_name']
         c_name = int(m_name.title())
         type(c_name)
         type(m_name)
         result_final = pd.DataFrame()
-        #Get Products by Popularity
         if c_name == '':
             return(flask.render_template('negative.html',name=m_name))
-        
-        else:
-            if (c_name not in Olist_customers and c_name not in all_customer and c_name not in Olist_all):
-                print('Popular products for this month')
-                print('Here 1')
-                result_final = get_popular_products()
-            elif c_name in big_spenders:
-                result_final = Upsell_products()
-                print('Here 2')
-            elif c_name in loyalists:
-                result_final = Recommendations_Cust2Vec(c_name)
-                print('Here 3')
-            elif c_name in all_customer:
-                result_final = Recommendations_ALS(c_name)
-                print('Here 4')
-            elif c_name in Olist_all:
-                result_final = Recommendations_Cust2Vec(c_name)
-                print('Here 5')
-            #print(result_final)
-            
-            names = []
-            ratings = []
-            for i in range(len(result_final)):
-                names.append(result_final.iloc[i][0])
-                ratings.append(str(round(result_final.iloc[i][1], 1)))
 
-            return flask.render_template('positive.html',movie_names=names,movie_date=ratings,search_name=m_name)
+        if (c_name not in Olist_customers and c_name not in all_customer and c_name not in Olist_all):
+            print('Popular products for this month')
+            print('Here 1')
+            result_final = get_popular_products()
+        elif c_name in big_spenders:
+            result_final = Upsell_products()
+            print('Here 2')
+        elif c_name in loyalists:
+            result_final = Recommendations_Cust2Vec(c_name)
+            print('Here 3')
+        elif c_name in all_customer:
+            result_final = Recommendations_ALS(c_name)
+            print('Here 4')
+        elif c_name in Olist_all:
+            result_final = Recommendations_Cust2Vec(c_name)
+            print('Here 5')
+        #print(result_final)
+
+        names = []
+        ratings = []
+        for i in range(len(result_final)):
+            names.append(result_final.iloc[i][0])
+            ratings.append(str(round(result_final.iloc[i][1], 1)))
+
+        return flask.render_template('positive.html',movie_names=names,movie_date=ratings,search_name=m_name)
 
 if __name__ == '__main__':
     app.run()
